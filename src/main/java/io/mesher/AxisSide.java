@@ -1,5 +1,7 @@
 package io.mesher;
 
+import java.util.List;
+
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 
@@ -11,7 +13,7 @@ public enum AxisSide {
   DEPTH_FRONT(0, 0, +1, Axis.DEPTH, Side.FRONT),
   DEPTH_BACK(0, 0, -1, Axis.DEPTH, Side.BACK);
 
-  public static final java.util.List<AxisSide> VALUES = java.util.List.of(values());
+  public static final List<AxisSide> VALUES = List.of(values());
 
   public final Axis axis;
   public final Side side;
@@ -34,38 +36,21 @@ public enum AxisSide {
     return name() + "(x=" + x + ", y=" + y + ", z=" + z + ")";
   }
 
-  /**
-   * Returns the Axis associated with this AxisSide.
-   */
-  public Axis getAxis() {
-    return axis;
-  }
-
-  /**
-   * Returns the Side associated with this AxisSide.
-   */
-  public Side getSide() {
-    return side;
-  }
-
-  /**
-   * Returns an AxisSide based on the provided Axis and Side instances.
-   *
-   * @param axis the Axis instance
-   * @param side the Side instance
-   * @return the corresponding AxisSide
-   */
   public static AxisSide of(Axis axis, Side side) {
-    switch (axis) {
-      case HORIZONTAL:
-        return side == Side.FRONT ? HORIZONTAL_FRONT : HORIZONTAL_BACK;
-      case VERTICAL:
-        return side == Side.FRONT ? VERTICAL_FRONT : VERTICAL_BACK;
-      case DEPTH:
-        return side == Side.FRONT ? DEPTH_FRONT : DEPTH_BACK;
-      default:
-        throw new IllegalArgumentException("Unknown axis: " + axis);
-    }
+    return switch (axis) {
+      case HORIZONTAL -> checkSide(side, HORIZONTAL_BACK, HORIZONTAL_FRONT);
+      case VERTICAL -> checkSide(side, VERTICAL_BACK, VERTICAL_FRONT);
+      case DEPTH -> checkSide(side, DEPTH_BACK, DEPTH_FRONT);
+      default -> throw new IllegalArgumentException("Unknown axis: " + axis);
+    };
+  }
+
+  private static AxisSide checkSide(Side side, AxisSide forBack, AxisSide forFront) {
+    return switch (side) {
+      case BACK -> forBack;
+      case FRONT -> forFront;
+      default -> throw new IllegalArgumentException("Unknown side: " + side);
+    };
   }
 
 }

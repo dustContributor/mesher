@@ -24,6 +24,10 @@ public enum Axis {
         this == DEPTH ? a : 0);
   }
 
+  public int axisValue(Vector3ic v) {
+    return axisValue(v.x(), v.y(), v.z());
+  }
+
   public int axisValue(int x, int y, int z) {
     return switch (this) {
       case HORIZONTAL -> x;
