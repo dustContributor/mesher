@@ -24,7 +24,7 @@ public class Stripifier {
       var sideAxis = plane[0];
       var forwardAxis = plane[1];
       var advanceAxis = Axis.remaining(sideAxis, forwardAxis);
-      var size = advanceAxis.axisValue(chunk.size);
+      var size = chunk.dimension(advanceAxis);
       var backStrips = new ArrayList<StripPlane>();
       var frontStrips = new ArrayList<StripPlane>();
       for (int s = 0; s < size; ++s) {
@@ -34,16 +34,16 @@ public class Stripifier {
         frontStrips.add(f);
       }
       stripsByVoxelPlane.put(
-          VoxelPlane.of(sideAxis, forwardAxis, Side.BACK), backStrips);
+          new VoxelPlane(sideAxis, forwardAxis, Side.BACK), backStrips);
       stripsByVoxelPlane.put(
-          VoxelPlane.of(sideAxis, forwardAxis, Side.FRONT), frontStrips);
+          new VoxelPlane(sideAxis, forwardAxis, Side.FRONT), frontStrips);
     }
     return Strips.of(stripsByVoxelPlane);
   }
 
   private StripPlane work(Side side, Axis sideAxis, Axis forwardAxis, int advanceOffset) {
     var advanceAxis = Axis.remaining(sideAxis, forwardAxis);
-    var sdSize = sideAxis.axisValue(chunk.size);
+    var sdSize = chunk.dimension(sideAxis);
     var stripsPlane = new Strip[sdSize][];
     for (int sdi = 0; sdi < sdSize; ++sdi) {
       var strips = strip(side, sideAxis, forwardAxis, sdi, advanceOffset);
@@ -54,7 +54,7 @@ public class Stripifier {
   }
 
   private ArrayList<Strip> strip(Side side, Axis sideAxis, Axis forwardAxis, int sidePos, int advancePos) {
-    var fwSize = forwardAxis.axisValue(chunk.size);
+    var fwSize = chunk.dimension(forwardAxis);
     var axisSide = AxisSide.of(sideAxis, side);
     var advanceAxis = Axis.remaining(sideAxis, forwardAxis);
     var segmentStart = sideAxis.advance(new Vector3i(), sidePos);

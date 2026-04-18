@@ -59,6 +59,10 @@ public final class Voxels {
     return getValue(x, y, z).isPresent();
   }
 
+  public final int dimension(Axis axis) {
+    return axis.axisValue(width, height, depth);
+  }
+
   private int indexOf(int x, int y, int z) {
     return z * height + y * width + x;
   }

@@ -8,11 +8,10 @@ import java.util.stream.Collectors;
 
 public class Strips {
   public record VoxelPlane(Axis sideAxis, Axis forwardAxis, Side side) {
-    public static VoxelPlane of(Axis sideAxis, Axis forwardAxis, Side side) {
-      return new VoxelPlane(
-          Objects.requireNonNull(sideAxis),
-          Objects.requireNonNull(forwardAxis),
-          Objects.requireNonNull(side));
+    public VoxelPlane {
+         Objects.requireNonNull(sideAxis);
+         Objects.requireNonNull(forwardAxis);
+         Objects.requireNonNull(side);
     }
   }
 
