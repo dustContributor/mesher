@@ -33,7 +33,7 @@ public final class StripPlane {
     this.size = stripsByAdvance.length;
   }
 
-  public static StripPlane of(Strip[][] strips, Axis sideAxis, Axis forwardAxis, Side side, int x, int y, int z) {
+  public static StripPlane of(Strip[][] strips, Axis sideAxis, Axis forwardAxis, Side side, Vector3i position) {
     var innerStrips = new InnerStrip[strips.length];
     for (int i = 0; i < strips.length; ++i) {
       var strip = strips[i];
@@ -48,7 +48,7 @@ public final class StripPlane {
       }
       innerStrips[i] = new InnerStrip(starts, lengths, values);
     }
-    return new StripPlane(new Vector3i(x, y, z), sideAxis, forwardAxis, side, innerStrips);
+    return new StripPlane(position, sideAxis, forwardAxis, side, innerStrips);
   }
 
   public int segmentLengthOf(int advance, int start) {

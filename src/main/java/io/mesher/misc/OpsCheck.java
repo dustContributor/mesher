@@ -11,4 +11,11 @@ public final class OpsCheck {
     }
     return v;
   }
+
+  public static int positive(int v, String name) {
+    if (v < 0) {
+      throw new IllegalArgumentException("%s %d must be positive!".formatted(name, v));
+    }
+    return v;
+  }
 }
