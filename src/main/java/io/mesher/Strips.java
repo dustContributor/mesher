@@ -12,16 +12,6 @@ public class Strips {
     this.stripsByVoxelPlane = stripsByVoxelPlane;
   }
 
-  public int sizeOf(VoxelPlane voxelPlane) {
-    var strips = stripsByVoxelPlane.get(voxelPlane);
-    return strips.length;
-  }
-
-  public StripPlane stripsAt(VoxelPlane voxelPlane, int advance) {
-    var strips = stripsByVoxelPlane.get(voxelPlane);
-    return strips[advance];
-  }
-
   public final Strips forEach(BiConsumer<VoxelPlane, List<StripPlane>> consumer) {
     for (var entry : stripsByVoxelPlane.entrySet()) {
       consumer.accept(entry.getKey(), List.of(entry.getValue()));

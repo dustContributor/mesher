@@ -46,27 +46,6 @@ public final class StripList implements Iterable<StripSegment> {
     return Optional.of(new StripSegment(refStart, refLength, refValue));
   }
 
-  public final Optional<StripSegment> find(int start) {
-    OpsCheck.positive(start, "start");
-    var i = Arrays.binarySearch(starts, start);
-    if (i < 0) {
-      return Optional.empty();
-    }
-    var s = new StripSegment(startAt(i), lengthAt(i), valueAt(i));
-    return Optional.of(s);
-  }
-
-  public final void forEach(StripConsumer consumer) {
-    Objects.requireNonNull(consumer, "consumer");
-    for (int i = 0; i < count(); ++i) {
-      consumer.accept(startAt(i), lengthAt(i), valueAt(i));
-    }
-  }
-
-  interface StripConsumer {
-    public void accept(int start, int length, int value);
-  }
-
   public final int startAt(int i) {
     return starts[i];
   }
