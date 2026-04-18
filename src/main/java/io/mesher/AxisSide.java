@@ -32,8 +32,8 @@ public enum AxisSide {
   }
 
   @Override
-  public String toString() {
-    return name() + "(x=" + x + ", y=" + y + ", z=" + z + ")";
+  public final String toString() {
+    return "%s(x=%d, y=%d, z=%d, axis=%s, side=%s)".formatted(name(), x, y, z, axis, side);
   }
 
   public static AxisSide of(Axis axis, Side side) {
