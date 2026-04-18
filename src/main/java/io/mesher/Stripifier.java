@@ -21,20 +21,21 @@ public class Stripifier {
     for (var plane : planes) {
       var sideAxis = plane[0];
       var forwardAxis = plane[1];
+      var backVoxelPlane = new VoxelPlane(sideAxis, forwardAxis, Side.BACK);
+      var frontVoxelPlane = new VoxelPlane(sideAxis, forwardAxis, Side.FRONT);
       var advanceAxis = Axis.remaining(sideAxis, forwardAxis);
       var size = chunk.dimension(advanceAxis);
       var backStrips = new ArrayList<StripPlane>();
       var frontStrips = new ArrayList<StripPlane>();
       for (int s = 0; s < size; ++s) {
-        var b = work(new VoxelPlane(sideAxis, forwardAxis, Side.BACK), s);
-        var f = work(new VoxelPlane(sideAxis, forwardAxis, Side.FRONT), s);
+        // TODO: Push back/front iteration lower in the logic
+        var b = work(backVoxelPlane, s);
+        var f = work(frontVoxelPlane, s);
         backStrips.add(b);
         frontStrips.add(f);
       }
-      stripsByVoxelPlane.put(
-          new VoxelPlane(sideAxis, forwardAxis, Side.BACK), backStrips);
-      stripsByVoxelPlane.put(
-          new VoxelPlane(sideAxis, forwardAxis, Side.FRONT), frontStrips);
+      stripsByVoxelPlane.put(backVoxelPlane, backStrips);
+      stripsByVoxelPlane.put(frontVoxelPlane, frontStrips);
     }
     return Strips.of(stripsByVoxelPlane);
   }
