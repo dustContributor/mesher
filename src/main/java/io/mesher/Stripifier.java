@@ -4,8 +4,6 @@ import java.util.*;
 
 import org.joml.Vector3i;
 
-import io.mesher.Strips.VoxelPlane;
-
 public class Stripifier {
   private final Voxels chunk;
 
@@ -28,8 +26,8 @@ public class Stripifier {
       var backStrips = new ArrayList<StripPlane>();
       var frontStrips = new ArrayList<StripPlane>();
       for (int s = 0; s < size; ++s) {
-        var b = work(Side.BACK, sideAxis, forwardAxis, s);
-        var f = work(Side.FRONT, sideAxis, forwardAxis, s);
+        var b = work(new VoxelPlane(sideAxis, forwardAxis, Side.BACK), s);
+        var f = work(new VoxelPlane(sideAxis, forwardAxis, Side.FRONT), s);
         backStrips.add(b);
         frontStrips.add(f);
       }
@@ -41,23 +39,23 @@ public class Stripifier {
     return Strips.of(stripsByVoxelPlane);
   }
 
-  private StripPlane work(Side side, Axis sideAxis, Axis forwardAxis, int advanceOffset) {
-    var advanceAxis = Axis.remaining(sideAxis, forwardAxis);
-    var sdSize = chunk.dimension(sideAxis);
+  private StripPlane work(VoxelPlane plane, int advanceOffset) {
+    var advanceAxis = Axis.remaining(plane.sideAxis(), plane.forwardAxis());
+    var sdSize = chunk.dimension(plane.sideAxis());
     var stripsPlane = new Strip[sdSize][];
     for (int sdi = 0; sdi < sdSize; ++sdi) {
-      var strips = strip(side, sideAxis, forwardAxis, sdi, advanceOffset);
+      var strips = strip(plane, sdi, advanceOffset);
       stripsPlane[sdi] = strips.toArray(Strip[]::new);
     }
     var start = advanceAxis.advance(new Vector3i(), advanceOffset);
-    return StripPlane.of(stripsPlane, sideAxis, forwardAxis, side, start);
+    return StripPlane.of(stripsPlane, plane, start);
   }
 
-  private ArrayList<Strip> strip(Side side, Axis sideAxis, Axis forwardAxis, int sidePos, int advancePos) {
-    var fwSize = chunk.dimension(forwardAxis);
-    var axisSide = AxisSide.of(sideAxis, side);
-    var advanceAxis = Axis.remaining(sideAxis, forwardAxis);
-    var segmentStart = sideAxis.advance(new Vector3i(), sidePos);
+  private ArrayList<Strip> strip(VoxelPlane plane, int sidePos, int advancePos) {
+    var fwSize = chunk.dimension(plane.forwardAxis());
+    var axisSide = AxisSide.of(plane.sideAxis(), plane.side());
+    var advanceAxis = Axis.remaining(plane.sideAxis(), plane.forwardAxis());
+    var segmentStart = plane.sideAxis().advance(new Vector3i(), sidePos);
     advanceAxis.advance(segmentStart, advancePos);
     var strips = new ArrayList<Strip>();
     var refValue = OptionalInt.empty();
@@ -67,22 +65,22 @@ public class Stripifier {
       var nextValue = chunk.getValue(advanceOffset);
       if (refValue.isEmpty()) {
         refValue = nextValue;
-        forwardAxis.advance(advanceOffset);
+        plane.forwardAxis().advance(advanceOffset);
         continue;
       }
       if (refValue.equals(nextValue) && !chunk.isOccluded(advanceOffset, axisSide)) {
         ++length;
-        forwardAxis.advance(advanceOffset);
+        plane.forwardAxis().advance(advanceOffset);
         if (fwi < fwSize - 1) {
           // didnt reach the edge yet
           continue;
         }
       }
-      strips.add(Strip.of(segmentStart, length, side, refValue.getAsInt()));
+      strips.add(Strip.of(segmentStart, length, plane.side(), refValue.getAsInt()));
       // re-set the starting point of the next strip and reference values
       refValue = nextValue;
       length = 1;
-      forwardAxis.advance(advanceOffset);
+      plane.forwardAxis().advance(advanceOffset);
       segmentStart.set(advanceOffset);
     }
     return strips;

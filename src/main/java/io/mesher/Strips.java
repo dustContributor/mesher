@@ -2,19 +2,10 @@ package io.mesher;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public class Strips {
-  public record VoxelPlane(Axis sideAxis, Axis forwardAxis, Side side) {
-    public VoxelPlane {
-         Objects.requireNonNull(sideAxis);
-         Objects.requireNonNull(forwardAxis);
-         Objects.requireNonNull(side);
-    }
-  }
-
   private final Map<VoxelPlane, StripPlane[]> stripsByVoxelPlane;
 
   private Strips(Map<VoxelPlane, StripPlane[]> stripsByVoxelPlane) {
