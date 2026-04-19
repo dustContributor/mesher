@@ -12,6 +12,9 @@ public enum Axis {
   DEPTH;
 
   public static final List<Axis> VALUES = List.of(values());
+  static {
+    VALUES.forEach(Object::hashCode);
+  }
 
   public Vector3i advance(Vector3i v) {
     return advance(v, 1);

@@ -6,4 +6,7 @@ public enum Side {
   BACK, FRONT;
 
   public static final List<Side> VALUES = List.of(values());
+  static {
+    VALUES.forEach(Object::hashCode);
+  }
 }

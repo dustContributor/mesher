@@ -14,6 +14,9 @@ public enum AxisSide {
   DEPTH_BACK(0, 0, -1, Axis.DEPTH, Side.BACK);
 
   public static final List<AxisSide> VALUES = List.of(values());
+  static {
+    VALUES.forEach(Object::hashCode);
+  }
 
   public final Axis axis;
   public final Side side;
