@@ -63,8 +63,18 @@ public final class Voxels {
     return axis.axisValue(width, height, depth);
   }
 
+  public final int count() {
+    int count = 0;
+    for (int value : data) {
+      if (value != 0) {
+        count++;
+      }
+    }
+    return count;
+  }
+
   private int indexOf(int x, int y, int z) {
-    return z * height + y * width + x;
+    return z * height * width + y * width + x;
   }
 
   private boolean isOutOfBounds(int x, int y, int z) {
