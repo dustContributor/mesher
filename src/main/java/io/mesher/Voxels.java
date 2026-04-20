@@ -1,5 +1,6 @@
 package io.mesher;
 
+import java.util.Arrays;
 import java.util.OptionalInt;
 
 import org.joml.Vector3i;
@@ -45,6 +46,11 @@ public final class Voxels {
     }
     int index = indexOf(x, y, z);
     data[index] = value;
+    return this;
+  }
+
+  public final Voxels setAllValues(int value) {
+    Arrays.fill(data, value);
     return this;
   }
 

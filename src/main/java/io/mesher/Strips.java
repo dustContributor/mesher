@@ -19,6 +19,18 @@ public final class Strips implements Iterable<Entry<VoxelPlane, List<StripPlane>
     return this;
   }
 
+  public final int count() {
+    int count = 0;
+    for (var e : this) {
+      for (var plane : e.getValue()) {
+        for (var stripList : plane) {
+          count += stripList.count();
+        }
+      }
+    }
+    return count;
+  }
+
   @Override
   public final Iterator<Entry<VoxelPlane, List<StripPlane>>> iterator() {
     return Arrays.asList(stripsByVoxelPlane).iterator();
