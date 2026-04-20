@@ -1,6 +1,8 @@
 package io.mesher;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.OptionalInt;
 
 import org.joml.Vector3i;
 
@@ -53,23 +55,31 @@ public class Stripifier {
 
   private ArrayList<Strip> strip(VoxelPlane plane, int sidePos, int advancePos) {
     var fwSize = chunk.dimension(plane.forwardAxis());
-    var axisSide = AxisSide.of(plane.sideAxis(), plane.side());
     var advanceAxis = Axis.remaining(plane.sideAxis(), plane.forwardAxis());
+    // check occlusion along the orthogonal axis
+    var occlusionSide = AxisSide.of(advanceAxis, plane.side());
     var segmentStart = plane.sideAxis().advance(new Vector3i(), sidePos);
     advanceAxis.advance(segmentStart, advancePos);
     var strips = new ArrayList<Strip>();
     var refValue = OptionalInt.empty();
     int length = 1;
     var advanceOffset = new Vector3i(segmentStart);
-    for (int fwi = 0; fwi <=fwSize; ++fwi) {
+    for (int fwi = 0; fwi <= fwSize; ++fwi) {
       var nextValue = chunk.getValue(advanceOffset);
+      // find the first non-empty voxel
       if (refValue.isEmpty()) {
-        refValue = nextValue;
+        if (chunk.isOccluded(advanceOffset, occlusionSide)) {
+          // treat occluded voxels as empty and keep searching
+          refValue = OptionalInt.empty();
+        } else {
+          // found our non occluded voxel
+          refValue = nextValue;
+        }
         segmentStart.set(advanceOffset);
         plane.forwardAxis().advance(advanceOffset);
         continue;
       }
-      if (refValue.equals(nextValue) && !chunk.isOccluded(advanceOffset, axisSide)) {
+      if (refValue.equals(nextValue) && !chunk.isOccluded(advanceOffset, occlusionSide)) {
         ++length;
         plane.forwardAxis().advance(advanceOffset);
         continue;
