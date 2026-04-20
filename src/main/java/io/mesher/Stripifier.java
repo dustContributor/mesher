@@ -64,7 +64,8 @@ public class Stripifier {
     var refValue = OptionalInt.empty();
     int length = 1;
     var advanceOffset = new Vector3i(segmentStart);
-    for (int fwi = 0; fwi <= fwSize; ++fwi) {
+    // TODO: Works but makes no sense
+    for (int fwi = -1; fwi <= fwSize; ++fwi) {
       var nextValue = chunk.getValue(advanceOffset);
       // find the first non-empty voxel
       if (refValue.isEmpty()) {
