@@ -17,9 +17,9 @@ public final class Mesher {
     return quads;
   }
 
-  private record Key(int start, int length, Axis sideAxis, Axis forwardAxis, Side side) {
-    public static Key of(VoxelPlane p, StripSegment s) {
-      return new Key(s.start(), s.length(), p.sideAxis(), p.forwardAxis(), p.side());
+  private record Key(int start, int length, int advance, Axis sideAxis, Axis forwardAxis, Side side) {
+    public static Key of(VoxelPlane p, StripSegment s, int advance) {
+      return new Key(s.start(), s.length(), advance, p.sideAxis(), p.forwardAxis(), p.side());
     }
   }
 
@@ -43,17 +43,17 @@ public final class Mesher {
   }
 
   private Optional<Quad> process(StripSegment segment, StripPlane stripPlane, int advance, HashSet<Key> processed) {
-    if (!processed.add(Key.of(stripPlane.voxelPlane, segment))) {
+    if (!processed.add(Key.of(stripPlane.voxelPlane, segment, advance))) {
       return Optional.empty();
     }
-    var sideLength = 0;
+    var sideLength = 1;
     for (int advi = advance + 1; advi <= stripPlane.size; ++advi) {
       var nextStrips = advi == stripPlane.size ? StripList.EMPTY : stripPlane.stripListAt(advi);
       var n = nextStrips.findExact(segment.start(), segment.length(), segment.value());
       if (n.isEmpty()) {
         break;
       }
-      if (!processed.add(Key.of(stripPlane.voxelPlane, n.get()))) {
+      if (!processed.add(Key.of(stripPlane.voxelPlane, n.get(), advi))) {
         throw new RuntimeException("shouldn't happen!");
       }
       ++sideLength;
