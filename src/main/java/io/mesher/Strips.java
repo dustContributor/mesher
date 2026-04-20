@@ -1,28 +1,35 @@
 package io.mesher;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-public class Strips {
-  private final Map<VoxelPlane, StripPlane[]> stripsByVoxelPlane;
+public final class Strips implements Iterable<Entry<VoxelPlane, List<StripPlane>>> {
+  private final Entry<VoxelPlane, List<StripPlane>>[] stripsByVoxelPlane;
 
-  private Strips(Map<VoxelPlane, StripPlane[]> stripsByVoxelPlane) {
-    this.stripsByVoxelPlane = stripsByVoxelPlane;
+  private Strips(Entry<VoxelPlane, List<StripPlane>>[] stripsByVoxelPlane) {
+    this.stripsByVoxelPlane = Objects.requireNonNull(stripsByVoxelPlane, "stripsByVoxelPlane");
   }
 
   public final Strips forEach(BiConsumer<VoxelPlane, List<StripPlane>> consumer) {
-    for (var entry : stripsByVoxelPlane.entrySet()) {
-      consumer.accept(entry.getKey(), List.of(entry.getValue()));
+    for (var entry : stripsByVoxelPlane) {
+      consumer.accept(entry.getKey(), entry.getValue());
     }
     return this;
   }
 
-  public static Strips of(Map<VoxelPlane, List<StripPlane>> stripsByPlane) {
-    return new Strips(stripsByPlane.entrySet()
-        .stream()
-        .collect(Collectors.toUnmodifiableMap(k -> k.getKey(),
-            v -> v.getValue().toArray(StripPlane[]::new))));
+  @Override
+  public final Iterator<Entry<VoxelPlane, List<StripPlane>>> iterator() {
+    return Arrays.asList(stripsByVoxelPlane).iterator();
+  }
+
+  @SuppressWarnings("unchecked")
+  public static Strips of(List<VoxelPlane> voxelPlanes, List<StripPlane> stripPlanes) {
+    var stripsByPlane = stripPlanes.stream().collect(Collectors.groupingBy(k -> k.voxelPlane));
+    var tmp = voxelPlanes.stream()
+        .map(v -> Map.entry(v, List.copyOf(stripsByPlane.get(v))))
+        .toArray(Entry[]::new);
+    return new Strips(tmp);
   }
 }
