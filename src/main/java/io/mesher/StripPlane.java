@@ -1,11 +1,13 @@
 package io.mesher;
 
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Objects;
 
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 
-public final class StripPlane {
+public final class StripPlane implements Iterable<StripList> {
 
   public final Vector3ic position;
   public final VoxelPlane voxelPlane;
@@ -44,8 +46,13 @@ public final class StripPlane {
   }
 
   @Override
+  public final Iterator<StripList> iterator() {
+    return Arrays.asList(stripsByAdvance).iterator();
+  }
+
+  @Override
   public final String toString() {
-    return "StripPlane(position=%s, voxelPlane=%s, strips=%d)".formatted(position, voxelPlane, stripsByAdvance.length);
+    return "StripPlane(position=%s, voxelPlane=%s, count=%d)".formatted(position, voxelPlane, size);
   }
 
 }

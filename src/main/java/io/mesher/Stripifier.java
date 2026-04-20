@@ -12,12 +12,13 @@ public class Stripifier {
   }
 
   public Strips work() {
-    var stripsByVoxelPlane = new HashMap<VoxelPlane, List<StripPlane>>();
     Axis[][] planes = {
         { Axis.HORIZONTAL, Axis.DEPTH }, // X-Z
         { Axis.HORIZONTAL, Axis.VERTICAL }, // X-Y
         { Axis.DEPTH, Axis.VERTICAL } // Z-Y
     };
+    var voxelPlanes = new ArrayList<VoxelPlane>();
+    var stripPlanes = new ArrayList<StripPlane>();
     for (var plane : planes) {
       var sideAxis = plane[0];
       var forwardAxis = plane[1];
@@ -25,19 +26,17 @@ public class Stripifier {
       var frontVoxelPlane = new VoxelPlane(sideAxis, forwardAxis, Side.FRONT);
       var advanceAxis = Axis.remaining(sideAxis, forwardAxis);
       var size = chunk.dimension(advanceAxis);
-      var backStrips = new ArrayList<StripPlane>();
-      var frontStrips = new ArrayList<StripPlane>();
       for (int s = 0; s < size; ++s) {
         // TODO: Push back/front iteration lower in the logic
         var b = work(backVoxelPlane, s);
         var f = work(frontVoxelPlane, s);
-        backStrips.add(b);
-        frontStrips.add(f);
+        stripPlanes.add(b);
+        stripPlanes.add(f);
       }
-      stripsByVoxelPlane.put(backVoxelPlane, backStrips);
-      stripsByVoxelPlane.put(frontVoxelPlane, frontStrips);
+      voxelPlanes.add(backVoxelPlane);
+      voxelPlanes.add(frontVoxelPlane);
     }
-    return Strips.of(stripsByVoxelPlane);
+    return Strips.of(voxelPlanes, stripPlanes);
   }
 
   private StripPlane work(VoxelPlane plane, int advanceOffset) {
@@ -62,27 +61,23 @@ public class Stripifier {
     var refValue = OptionalInt.empty();
     int length = 1;
     var advanceOffset = new Vector3i(segmentStart);
-    for (int fwi = 0; fwi < fwSize; ++fwi) {
+    for (int fwi = 0; fwi <=fwSize; ++fwi) {
       var nextValue = chunk.getValue(advanceOffset);
       if (refValue.isEmpty()) {
         refValue = nextValue;
+        segmentStart.set(advanceOffset);
         plane.forwardAxis().advance(advanceOffset);
         continue;
       }
       if (refValue.equals(nextValue) && !chunk.isOccluded(advanceOffset, axisSide)) {
         ++length;
         plane.forwardAxis().advance(advanceOffset);
-        if (fwi < fwSize - 1) {
-          // didnt reach the edge yet
-          continue;
-        }
+        continue;
       }
       strips.add(Strip.of(segmentStart, length, plane.side(), refValue.getAsInt()));
       // re-set the starting point of the next strip and reference values
-      refValue = nextValue;
+      refValue = OptionalInt.empty();
       length = 1;
-      plane.forwardAxis().advance(advanceOffset);
-      segmentStart.set(advanceOffset);
     }
     return strips;
   }

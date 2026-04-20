@@ -59,6 +59,20 @@ public final class Voxels {
     return getValue(x, y, z).isPresent();
   }
 
+  public final boolean isOutOfBounds(Vector3ic p) {
+    return isOutOfBounds(p.x(), p.y(), p.z());
+  }
+
+  public final boolean isOutOfBounds(int x, int y, int z) {
+    if (x < 0 || y < 0 || z < 0) {
+      return true;
+    }
+    if (x >= width || y >= height || z >= depth) {
+      return true;
+    }
+    return false;
+  }
+
   public final int dimension(Axis axis) {
     return axis.axisValue(width, height, depth);
   }
@@ -75,15 +89,5 @@ public final class Voxels {
 
   private int indexOf(int x, int y, int z) {
     return z * height * width + y * width + x;
-  }
-
-  private boolean isOutOfBounds(int x, int y, int z) {
-    if (x < 0 || y < 0 || z < 0) {
-      return true;
-    }
-    if (x >= width || y >= height || z >= depth) {
-      return true;
-    }
-    return false;
   }
 }
