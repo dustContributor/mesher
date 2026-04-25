@@ -24,8 +24,8 @@ public class Stripifier {
     for (var plane : planes) {
       var sideAxis = plane[0];
       var forwardAxis = plane[1];
-      var backVoxelPlane = new VoxelPlane(sideAxis, forwardAxis, Side.BACK);
-      var frontVoxelPlane = new VoxelPlane(sideAxis, forwardAxis, Side.FRONT);
+      var backVoxelPlane = VoxelPlane.of(sideAxis, forwardAxis, Side.BACK);
+      var frontVoxelPlane = VoxelPlane.of(sideAxis, forwardAxis, Side.FRONT);
       var advanceAxis = Axis.remaining(sideAxis, forwardAxis);
       var size = chunk.dimension(advanceAxis);
       for (int s = 0; s < size; ++s) {

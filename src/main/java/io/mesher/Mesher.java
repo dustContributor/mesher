@@ -21,9 +21,9 @@ public final class Mesher {
     stripPlanes.forEach(stripPlane -> process(stripPlane, dst));
   }
 
-  private record Key(int start, int length, int advance, Axis sideAxis, Axis forwardAxis, Side side) {
+  private record Key(int start, int length, int advance, VoxelPlane voxelPlane) {
     public static Key of(VoxelPlane p, StripSegment s, int advance) {
-      return new Key(s.start(), s.length(), advance, p.sideAxis(), p.forwardAxis(), p.side());
+      return new Key(s.start(), s.length(), advance, p);
     }
   }
 
