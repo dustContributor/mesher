@@ -57,10 +57,9 @@ public final class Mesher {
       ++sideLength;
     }
     var sideAxis = stripPlane.voxelPlane.sideAxis();
-    var forwardAxis = stripPlane.voxelPlane.forwardAxis();
     var position = new Vector3i(stripPlane.position);
     sideAxis.advance(position, advance);
-    var quad = new Quad(position, forwardAxis, sideAxis, segment.length(), sideLength, segment.value());
+    var quad = new Quad(position, stripPlane.voxelPlane, segment.length(), sideLength, segment.value());
     return Optional.of(quad);
   }
 
