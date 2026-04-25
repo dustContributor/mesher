@@ -27,15 +27,9 @@ public final class TextFormat {
 
   public static Voxels load(Stream<String> lines) {
     var items = lines.map(line -> {
-      for (int ci = 2; ci-- > 0;) {
-        // fast path without trimming first
-        if (line.isEmpty() || line.startsWith("#")) {
-          return null;
-        }
-        // otherwise trim and try again
-        if (ci == 1) {
-          line = line.trim();
-        }
+      line = line.trim();
+      if (line.isEmpty() || line.startsWith("#")) {
+        return null;
       }
       var parts = line.split("\\s+");
       if (parts.length != 4) {
