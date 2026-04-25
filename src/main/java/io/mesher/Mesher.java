@@ -13,19 +13,17 @@ public final class Mesher {
 
   public final ArrayList<Quad> work() {
     var quads = new ArrayList<Quad>();
-    strips.forEach((p, s) -> process(p, s, quads));
+    strips.forEach(e -> process(e.getKey(), e.getValue(), quads));
     return quads;
+  }
+
+  private void process(VoxelPlane voxelPlane, List<StripPlane> stripPlanes, List<Quad> dst) {
+    stripPlanes.forEach(stripPlane -> process(stripPlane, dst));
   }
 
   private record Key(int start, int length, int advance, Axis sideAxis, Axis forwardAxis, Side side) {
     public static Key of(VoxelPlane p, StripSegment s, int advance) {
       return new Key(s.start(), s.length(), advance, p.sideAxis(), p.forwardAxis(), p.side());
-    }
-  }
-
-  private void process(VoxelPlane voxelPlane, List<StripPlane> stripPlanes, List<Quad> dst) {
-    for (var stripPlane : stripPlanes) {
-      process(stripPlane, dst);
     }
   }
 

@@ -2,7 +2,6 @@ package io.mesher;
 
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public final class Strips implements Iterable<Entry<VoxelPlane, List<StripPlane>>> {
@@ -10,13 +9,6 @@ public final class Strips implements Iterable<Entry<VoxelPlane, List<StripPlane>
 
   private Strips(Entry<VoxelPlane, List<StripPlane>>[] stripsByVoxelPlane) {
     this.stripsByVoxelPlane = Objects.requireNonNull(stripsByVoxelPlane, "stripsByVoxelPlane");
-  }
-
-  public final Strips forEach(BiConsumer<VoxelPlane, List<StripPlane>> consumer) {
-    for (var entry : stripsByVoxelPlane) {
-      consumer.accept(entry.getKey(), entry.getValue());
-    }
-    return this;
   }
 
   public final int count() {
