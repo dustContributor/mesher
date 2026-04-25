@@ -59,9 +59,9 @@ public final class Voxels {
   }
 
   public final boolean isOccluded(int x, int y, int z, AxisSide axisSide) {
-    x += axisSide.x;
-    y += axisSide.y;
-    z += axisSide.z;
+    x += axisSide.direction().x();
+    y += axisSide.direction().y();
+    z += axisSide.direction().z();
     return getValue(x, y, z).isPresent();
   }
 
