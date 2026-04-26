@@ -5,12 +5,17 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import io.mesher.Voxels;
 
 public final class TextFormat {
   public static final int MAX_SUPPORTED_SIZE = 1024;
+
+  private static final Pattern PART_SPLIT = Pattern.compile("\\s+");
+  private static final String DELIMITER_COMMENT = "#";
+  private static final String DELIMITER_HEX = "0x";
 
   private TextFormat() {
     throw new RuntimeException();
@@ -28,10 +33,10 @@ public final class TextFormat {
   public static Voxels load(Stream<String> lines) {
     var items = lines.map(line -> {
       line = line.trim();
-      if (line.isEmpty() || line.startsWith("#")) {
+      if (line.isEmpty() || line.startsWith(DELIMITER_COMMENT)) {
         return null;
       }
-      var parts = line.split("\\s+");
+      var parts = PART_SPLIT.split(line);
       if (parts.length != 4) {
         throw new IllegalStateException("expected 'x y z value', got '%s'!".formatted(line));
       }
@@ -40,12 +45,12 @@ public final class TextFormat {
       int z = Integer.parseInt(parts[2]);
       var strv = parts[3];
       // always hex, support both ffee and 0xffee formats
-      int value = strv.startsWith("0x") ? Integer.decode(strv) : Integer.parseInt(strv, 16);
+      int value = strv.startsWith(DELIMITER_HEX) ? Integer.decode(strv) : Integer.parseInt(strv, 16);
       return new Item(x, y, z, value);
     }).filter(Objects::nonNull).toList();
 
     if (items.isEmpty()) {
-      throw new IllegalStateException("source has no data!");
+      throw new IllegalStateException("source has no usable data!");
     }
 
     var axisX = items.stream().mapToInt(Item::x).summaryStatistics();
