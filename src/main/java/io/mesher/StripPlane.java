@@ -26,6 +26,11 @@ public final class StripPlane implements Iterable<StripList> {
     var innerStrips = new StripList[strips.length];
     for (int i = 0; i < strips.length; ++i) {
       var strip = strips[i];
+      if (strip.length < 1) {
+        // nothing else to do really
+        innerStrips[i] = StripList.EMPTY;
+        continue;
+      }
       var starts = new int[strip.length];
       var lengths = new int[strip.length];
       var values = new int[strip.length];
