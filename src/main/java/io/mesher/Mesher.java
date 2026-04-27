@@ -57,8 +57,14 @@ public final class Mesher {
       ++sideLength;
     }
     var sideAxis = stripPlane.voxelPlane.sideAxis();
+    var forwardAxis = stripPlane.voxelPlane.forwardAxis();
     var position = new Vector3i(stripPlane.position);
+    /*
+     * Need to offset the quad by axis we're advancing on and the initial segment
+     * start along the forward axis
+     */
     sideAxis.advance(position, advance);
+    forwardAxis.advance(position, segment.start());
     var quad = new Quad(position, stripPlane.voxelPlane, segment.length(), sideLength, segment.value());
     return Optional.of(quad);
   }
