@@ -4,11 +4,45 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import org.joml.Vector3i;
+
 public final class Strips implements Iterable<Entry<VoxelPlane, List<StripPlane>>> {
   private final Entry<VoxelPlane, List<StripPlane>>[] stripsByVoxelPlane;
 
   private Strips(Entry<VoxelPlane, List<StripPlane>>[] stripsByVoxelPlane) {
     this.stripsByVoxelPlane = Objects.requireNonNull(stripsByVoxelPlane, "stripsByVoxelPlane");
+  }
+
+  /**
+   * Converts all strips in this Strips to quads with sideSize=1 (no merging).
+   * Each strip becomes its own quad with the correct position based on advance.
+   *
+   * @return a list of quads, one for each strip
+   */
+  public ArrayList<Quad> toQuads() {
+    var quads = new ArrayList<Quad>();
+    for (var e : this) {
+      var voxelPlane = e.getKey();
+      for (var stripPlane : e.getValue()) {
+        var sideAxis = voxelPlane.sideAxis();
+        var forwardAxis = voxelPlane.forwardAxis();
+        for (int advi = 0; advi < stripPlane.size; ++advi) {
+          var stripList = stripPlane.stripListAt(advi);
+          var planePosition = sideAxis.advance(new Vector3i(stripPlane.position), advi);
+          for (var stripSegment : stripList) {
+            var position = new Vector3i(planePosition);
+            forwardAxis.advance(position, stripSegment.start());
+            quads.add(new Quad(
+                position,
+                voxelPlane,
+                stripSegment.length(),
+                1, // sideSize=1, no merging
+                stripSegment.value()));
+          }
+        }
+      }
+    }
+    return quads;
   }
 
   public final int count() {
