@@ -7,10 +7,10 @@ import java.util.OptionalInt;
 import org.joml.Vector3i;
 
 public class Stripifier {
-  private final Voxels chunk;
+  private final Voxels voxels;
 
-  public Stripifier(Voxels chunk) {
-    this.chunk = Objects.requireNonNull(chunk);
+  public Stripifier(Voxels voxels) {
+    this.voxels = Objects.requireNonNull(voxels, "voxels");
   }
 
   public Strips work() {
@@ -27,7 +27,7 @@ public class Stripifier {
       var backVoxelPlane = VoxelPlane.of(sideAxis, forwardAxis, Side.BACK);
       var frontVoxelPlane = VoxelPlane.of(sideAxis, forwardAxis, Side.FRONT);
       var advanceAxis = Axis.remaining(sideAxis, forwardAxis);
-      var size = chunk.dimension(advanceAxis);
+      var size = voxels.dimension(advanceAxis);
       for (int s = 0; s < size; ++s) {
         // TODO: Push back/front iteration lower in the logic
         var b = work(backVoxelPlane, s);
@@ -43,7 +43,7 @@ public class Stripifier {
 
   private StripPlane work(VoxelPlane plane, int advanceOffset) {
     var advanceAxis = Axis.remaining(plane.sideAxis(), plane.forwardAxis());
-    var sdSize = chunk.dimension(plane.sideAxis());
+    var sdSize = voxels.dimension(plane.sideAxis());
     var stripsPlane = new Strip[sdSize][];
     for (int sdi = 0; sdi < sdSize; ++sdi) {
       var strips = strip(plane, sdi, advanceOffset);
@@ -54,7 +54,7 @@ public class Stripifier {
   }
 
   private ArrayList<Strip> strip(VoxelPlane plane, int sidePos, int advancePos) {
-    var fwSize = chunk.dimension(plane.forwardAxis());
+    var forwardSize = voxels.dimension(plane.forwardAxis());
     var advanceAxis = Axis.remaining(plane.sideAxis(), plane.forwardAxis());
     // check occlusion along the orthogonal axis
     var occlusionSide = AxisSide.of(advanceAxis, plane.side());
@@ -63,26 +63,29 @@ public class Stripifier {
     var strips = new ArrayList<Strip>();
     var refValue = OptionalInt.empty();
     int length = 1;
-    var advanceOffset = new Vector3i(segmentStart);
-    // TODO: Works but makes no sense
-    for (int fwi = -1; fwi <= fwSize; ++fwi) {
-      var nextValue = chunk.getValue(advanceOffset);
+    var forwardOffset = new Vector3i(segmentStart);
+    /*
+     * We want to check *including* the last voxel, that will check for occlusion
+     * out of bounds, which is correct to handle the outer faces of the voxels
+     */
+    while (plane.forwardAxis().axisValue(forwardOffset) <= forwardSize) {
+      var nextValue = voxels.getValue(forwardOffset);
       // find the first non-empty voxel
       if (refValue.isEmpty()) {
-        if (chunk.isOccluded(advanceOffset, occlusionSide)) {
+        if (voxels.isOccluded(forwardOffset, occlusionSide)) {
           // treat occluded voxels as empty and keep searching
           refValue = OptionalInt.empty();
         } else {
           // found our non occluded voxel
           refValue = nextValue;
         }
-        segmentStart.set(advanceOffset);
-        plane.forwardAxis().advance(advanceOffset);
+        segmentStart.set(forwardOffset);
+        plane.forwardAxis().advance(forwardOffset);
         continue;
       }
-      if (refValue.equals(nextValue) && !chunk.isOccluded(advanceOffset, occlusionSide)) {
+      if (refValue.equals(nextValue) && !voxels.isOccluded(forwardOffset, occlusionSide)) {
         ++length;
-        plane.forwardAxis().advance(advanceOffset);
+        plane.forwardAxis().advance(forwardOffset);
         continue;
       }
       strips.add(Strip.of(segmentStart, length, plane.side(), refValue.getAsInt()));
