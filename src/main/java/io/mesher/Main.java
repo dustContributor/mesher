@@ -1,26 +1,45 @@
 package io.mesher;
 
-import io.mesher.misc.OpsJson;
+import java.io.File;
+import java.util.concurrent.Callable;
 
-public class Main {
+import io.mesher.format.ObjFormat;
+import io.mesher.format.TextFormat;
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
+
+@Command(name = "run", description = "reads a simple txt format for voxel data and turns it into a mesh")
+public final class Main implements Callable<Integer> {
+    static {
+        // No formatter is easier for debugging
+        System.setProperty("joml.format", "false");
+    }
+
     public static void main(String[] args) {
-        var voxels = new Voxels(4, 4, 4);
-        for (int x = 0; x < voxels.width; ++x) {
-            for (int z = 0; z < voxels.depth; ++z) {
-                voxels.setValue(x, 0, z, 255);
-            }
-        }
+        int code = new CommandLine(new Main()).execute(args);
+        System.exit(code);
+    }
+
+    @Option(names = {
+            "--skipmesher" }, description = "Skip second pass of the algorithm, emitting geometry only for 'strips' of voxels.")
+    private boolean skipMesher;
+
+    @Parameters(index = "0", description = "File to read voxel data from.")
+    private File src;
+
+    @Parameters(index = "1", description = "File to write the mesh to.")
+    private File dst;
+
+    @Override
+    public final Integer call() throws Exception {
+        var voxels = TextFormat.load(src.toPath());
         var stripifier = new Stripifier(voxels);
         var strips = stripifier.work();
-        var counter = new Object() {
-            int v;
-        };
-        strips.forEach((p, s) -> {
-            System.out.println("--- {%d} ---".formatted(counter.v++));
-            System.out.println("VoxelPlane: ");
-            System.out.println(OpsJson.toStringPretty(p));
-            System.out.println("StripPlanes: ");
-            System.out.println(OpsJson.toStringPretty(s));
-        });
+        var mesher = new Mesher(strips);
+        var mesh = skipMesher ? strips.toQuads() : mesher.work();
+        ObjFormat.save(mesh, dst.toPath());
+        return 0;
     }
 }
