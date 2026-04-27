@@ -82,4 +82,13 @@ public final class StripList implements Iterable<StripSegment> {
       }
     };
   }
+
+  @Override
+  public final String toString() {
+    return "StripList(count=%d, starts=%s, lengths=%s, values=%s)".formatted(
+        count(),
+        Arrays.toString(starts),
+        Arrays.toString(lengths),
+        Arrays.toString(values));
+  }
 }
