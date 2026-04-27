@@ -10,6 +10,19 @@ import java.util.stream.Stream;
 
 import io.mesher.Voxels;
 
+/// Text format that represents voxels in Goxel's style. Uses '#' for comments.
+///
+/// Voxels are presented in the following form:
+/// ```
+/// # conceptually:
+/// x y z value
+/// # concrete example:
+/// 5 2 0 ababab
+/// ```
+///
+/// Where `x`, `y` and `z` are the integer coordinates of the voxel, and `value`
+/// is an arbitrary hexadecimal value attached to the represented voxel. This
+/// reader also accepts the `0x` prefix on every hexadecimal value.
 public final class TextFormat {
   public static final int MAX_SUPPORTED_SIZE = 1024;
 
@@ -52,7 +65,7 @@ public final class TextFormat {
     if (items.isEmpty()) {
       throw new IllegalStateException("source has no usable data!");
     }
-
+    // Re-center all voxels in case we have gaps on the outer sides
     var axisX = items.stream().mapToInt(Item::x).summaryStatistics();
     var axisY = items.stream().mapToInt(Item::y).summaryStatistics();
     var axisZ = items.stream().mapToInt(Item::z).summaryStatistics();
