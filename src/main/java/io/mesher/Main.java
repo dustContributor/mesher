@@ -34,7 +34,7 @@ public final class Main implements Callable<Integer> {
         var strips = stripifier.work();
         var mesher = new Mesher(strips);
         var mesh = skipMesher ? strips.toQuads() : mesher.work();
-        ObjFormat.save(mesh, dst.toPath());
+        ObjFormat.ofDefault().save(mesh, dst.toPath());
         return 0;
     }
 
