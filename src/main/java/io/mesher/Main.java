@@ -10,17 +10,8 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
-@Command(name = "run", description = "reads a simple txt format for voxel data and turns it into a mesh")
+@Command(name = "run", description = "Reads a simple txt format for voxel data and turns it into a mesh.")
 public final class Main implements Callable<Integer> {
-    static {
-        // No formatter is easier for debugging
-        System.setProperty("joml.format", "false");
-    }
-
-    public static void main(String[] args) {
-        int code = new CommandLine(new Main()).execute(args);
-        System.exit(code);
-    }
 
     @Option(names = {
             "--noswapzy" }, description = "Loader assumes the file has Y up, use this flag to skip swapping the coordinates to Z up.")
@@ -45,5 +36,15 @@ public final class Main implements Callable<Integer> {
         var mesh = skipMesher ? strips.toQuads() : mesher.work();
         ObjFormat.save(mesh, dst.toPath());
         return 0;
+    }
+
+    static {
+        // No formatter is easier for debugging
+        System.setProperty("joml.format", "false");
+    }
+
+    public static void main(String[] args) {
+        int code = new CommandLine(new Main()).execute(args);
+        System.exit(code);
     }
 }
