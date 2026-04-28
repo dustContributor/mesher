@@ -23,6 +23,10 @@ public final class Main implements Callable<Integer> {
     }
 
     @Option(names = {
+            "--noswapzy" }, description = "Loader assumes the file has Y up, use this flag to skip swapping the coordinates to Z up.")
+    private boolean noSwapZY;
+
+    @Option(names = {
             "--skipmesher" }, description = "Skip second pass of the algorithm, emitting geometry only for 'strips' of voxels.")
     private boolean skipMesher;
 
@@ -34,7 +38,7 @@ public final class Main implements Callable<Integer> {
 
     @Override
     public final Integer call() throws Exception {
-        var voxels = TextFormat.load(src.toPath());
+        var voxels = TextFormat.ofConfig(new TextFormat.Config(!noSwapZY)).load(src.toPath());
         var stripifier = new Stripifier(voxels);
         var strips = stripifier.work();
         var mesher = new Mesher(strips);

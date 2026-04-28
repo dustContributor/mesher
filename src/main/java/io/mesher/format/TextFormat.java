@@ -30,11 +30,17 @@ public final class TextFormat {
   private static final String DELIMITER_COMMENT = "#";
   private static final String DELIMITER_HEX = "0x";
 
-  private TextFormat() {
-    throw new RuntimeException();
+  public record Config(boolean swapZY) {
+    public static final Config DEFAULT = new Config(true);
+  };
+
+  private final Config config;
+
+  private TextFormat(Config config) {
+    this.config = Objects.requireNonNull(config, "config");
   }
 
-  public static Voxels load(Path path) {
+  public final Voxels load(Path path) {
     Objects.requireNonNull(path, "path");
     try {
       return load(Files.lines(path));
@@ -43,7 +49,10 @@ public final class TextFormat {
     }
   }
 
-  public static Voxels load(Stream<String> lines) {
+  public final Voxels load(Stream<String> lines) {
+    record Item(int x, int y, int z, int v) {
+      // Empty
+    }
     var items = lines.map(line -> {
       line = line.trim();
       if (line.isEmpty() || line.startsWith(DELIMITER_COMMENT)) {
@@ -56,6 +65,11 @@ public final class TextFormat {
       int x = Integer.parseInt(parts[0]);
       int y = Integer.parseInt(parts[1]);
       int z = Integer.parseInt(parts[2]);
+      if (config.swapZY()) {
+        var t = z;
+        z = y;
+        y = t;
+      }
       var strv = parts[3];
       // always hex, support both ffee and 0xffee formats
       int value = strv.startsWith(DELIMITER_HEX) ? Integer.decode(strv) : Integer.parseInt(strv, 16);
@@ -90,6 +104,14 @@ public final class TextFormat {
     return voxels;
   }
 
+  public static TextFormat ofDefault() {
+    return new TextFormat(Config.DEFAULT);
+  }
+
+  public static TextFormat ofConfig(Config config) {
+    return new TextFormat(config);
+  }
+
   private static void checkSize(int v, String name) {
     if (v < 0 || v > MAX_SUPPORTED_SIZE) {
       throw new IllegalStateException("%s of %d exceeds max supported size of %d!"
@@ -97,7 +119,4 @@ public final class TextFormat {
     }
   }
 
-  private record Item(int x, int y, int z, int v) {
-    // Empty
-  }
 }
