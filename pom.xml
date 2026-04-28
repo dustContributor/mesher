@@ -13,7 +13,6 @@
         <maven.compiler.target>25</maven.compiler.target>
         <joml.version>1.10.8</joml.version>
         <picocli.version>4.7.7</picocli.version>
-        <jackson.version>3.0.0</jackson.version>
         <junit.version>5.10.2</junit.version>
         <assertj.version>3.25.3</assertj.version>
     </properties>
@@ -23,11 +22,6 @@
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
             <version>${picocli.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>tools.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>org.joml</groupId>
