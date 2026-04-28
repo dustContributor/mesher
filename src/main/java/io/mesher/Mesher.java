@@ -8,7 +8,7 @@ public final class Mesher {
   private final Strips strips;
 
   public Mesher(Strips strips) {
-    this.strips = Objects.requireNonNull(strips);
+    this.strips = Objects.requireNonNull(strips, "strips");
   }
 
   public final ArrayList<Quad> work() {

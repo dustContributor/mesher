@@ -41,7 +41,7 @@ public enum Axis {
   }
 
   public static Axis remaining(Axis axisA, Axis axisB) {
-    if (Objects.requireNonNull(axisA) == Objects.requireNonNull(axisB)) {
+    if (Objects.requireNonNull(axisA, "axisA") == Objects.requireNonNull(axisB, "axisB")) {
       throw new IllegalArgumentException("axis must be different!");
     }
     for (Axis axis : VALUES) {
