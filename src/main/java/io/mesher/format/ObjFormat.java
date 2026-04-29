@@ -36,13 +36,18 @@ public final class ObjFormat {
     for (var quad : quads) {
       var position = to3i(quad.position());
       var side = quad.side();
-      // Have to flip them around for proper winding order on back faces
-      var forwardAxis = side == Side.FRONT ? quad.forwardAxis() : quad.sideAxis();
-      var sideAxis = side == Side.FRONT ? quad.sideAxis() : quad.forwardAxis();
-      var remainingAxis = Axis.remaining(forwardAxis, sideAxis);
+      var forwardAxis = quad.forwardAxis();
+      var sideAxis = quad.sideAxis();
       int forwardSize = quad.forwardSize();
       int sideSize = quad.sideSize();
-
+      if (side == Side.BACK) {
+        // Have to flip them around for proper winding order on back faces
+        sideAxis = forwardAxis;
+        forwardAxis = quad.sideAxis();
+        sideSize = forwardSize;
+        forwardSize = quad.sideSize();
+      }
+      var remainingAxis = Axis.remaining(forwardAxis, sideAxis);
       if (side == Side.FRONT) {
         // Front face of the voxel is 1 unit further away
         remainingAxis.advance(position);
