@@ -16,7 +16,7 @@ public class Stripifier {
   public Strips work() {
     Axis[][] planes = {
         { Axis.HORIZONTAL, Axis.DEPTH }, // X-Z
-        { Axis.HORIZONTAL, Axis.VERTICAL }, // X-Y
+        { Axis.VERTICAL, Axis.HORIZONTAL }, // Y-X
         { Axis.DEPTH, Axis.VERTICAL } // Z-Y
     };
     var voxelPlanes = new ArrayList<VoxelPlane>();

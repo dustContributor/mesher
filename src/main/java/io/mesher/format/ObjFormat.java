@@ -35,12 +35,13 @@ public final class ObjFormat {
 
     for (var quad : quads) {
       var position = to3i(quad.position());
-      var forwardAxis = quad.forwardAxis();
-      var sideAxis = quad.sideAxis();
+      var side = quad.side();
+      // Have to flip them around for proper winding order on back faces
+      var forwardAxis = side == Side.FRONT ? quad.forwardAxis() : quad.sideAxis();
+      var sideAxis = side == Side.FRONT ? quad.sideAxis() : quad.forwardAxis();
       var remainingAxis = Axis.remaining(forwardAxis, sideAxis);
       int forwardSize = quad.forwardSize();
       int sideSize = quad.sideSize();
-      var side = quad.side();
 
       if (side == Side.FRONT) {
         // Front face of the voxel is 1 unit further away
@@ -49,7 +50,7 @@ public final class ObjFormat {
 
       // Compute the four corner positions
 
-      // Corner 1: (0, 0)
+      // Corner 0: (0, 0)
       vertices.add(to3i(position));
       // Corner 1: (forwardSize, 0)
       vertices.add(forwardAxis.advance(to3i(position), forwardSize));
