@@ -2,7 +2,7 @@ package io.mesher.format;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Stream;
@@ -78,8 +78,7 @@ public final class ObjFormat {
           tracker.normal(AxisSide.of(remainingAxis, side).direction())));
     }
     // Build OBJ content
-    var sb = new StringBuilder();
-    try (var formatter = new Formatter(sb, Locale.ROOT)) {
+    try (var formatter = new Formatter(path.toFile(), StandardCharsets.UTF_8, Locale.ROOT)) {
       // Write each de-duplicated attribute first in the file
       tracker.vertices().forEach(v -> formatter.format("v %d.0 %d.0 %d.0%n", v.x(), v.y(), v.z()));
       tracker.coords().forEach(c -> formatter.format("vt %d.0 %d.0%n", c.x(), c.y()));
@@ -97,10 +96,6 @@ public final class ObjFormat {
             quad.vert2(), quad.coord2(), quad.normal(),
             quad.vert3(), quad.coord3(), quad.normal());
       }
-    }
-
-    try {
-      Files.writeString(path, sb);
     } catch (IOException e) {
       throw new UncheckedIOException("failed to save to %s!".formatted(path), e);
     }
