@@ -79,8 +79,8 @@ src/main/java/io/mesher/
 ├── Mesher.java        # Second pass, converts strips to merged quads
 ├── Voxels.java        # Generic 3D voxel data storage
 └── format/
-    ├── ObjFormat.java # OBJ file reader/writer
-    └── TextFormat.java # Voxel text format reader/writer
+    ├── ObjFormat.java # OBJ file writer
+    └── TextFormat.java # Voxel text format reader
 ```
 
 ## Algorithm Overview
