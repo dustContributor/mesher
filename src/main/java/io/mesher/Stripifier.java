@@ -47,13 +47,13 @@ public class Stripifier {
     var stripsPlane = new Strip[sdSize][];
     for (int sdi = 0; sdi < sdSize; ++sdi) {
       var strips = strip(plane, sdi, advanceOffset);
-      stripsPlane[sdi] = strips.toArray(Strip[]::new);
+      stripsPlane[sdi] = strips;
     }
     var start = advanceAxis.advance(new Vector3i(), advanceOffset);
     return StripPlane.of(stripsPlane, plane, start);
   }
 
-  private ArrayList<Strip> strip(VoxelPlane plane, int sidePos, int advancePos) {
+  private Strip[] strip(VoxelPlane plane, int sidePos, int advancePos) {
     var forwardSize = voxels.dimension(plane.forwardAxis());
     var advanceAxis = Axis.remaining(plane.sideAxis(), plane.forwardAxis());
     // check occlusion along the orthogonal axis
@@ -93,6 +93,6 @@ public class Stripifier {
       refValue = OptionalInt.empty();
       length = 1;
     }
-    return strips;
+    return strips.toArray(Strip[]::new);
   }
 }

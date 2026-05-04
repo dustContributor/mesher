@@ -24,6 +24,7 @@ public final class StripPlane implements Iterable<StripList> {
 
   public static StripPlane of(Strip[][] strips, VoxelPlane voxelPlane, Vector3i position) {
     var innerStrips = new StripList[strips.length];
+    var forwardAxis = voxelPlane.forwardAxis();
     for (int i = 0; i < strips.length; ++i) {
       var strip = strips[i];
       if (strip.length < 1) {
@@ -36,7 +37,7 @@ public final class StripPlane implements Iterable<StripList> {
       var values = new int[strip.length];
       for (int j = 0; j < strip.length; ++j) {
         var tmp = strip[j];
-        starts[j] = voxelPlane.forwardAxis().axisValue(tmp.x(), tmp.y(), tmp.z());
+        starts[j] = forwardAxis.axisValue(tmp.x(), tmp.y(), tmp.z());
         lengths[j] = strip[j].length();
         values[j] = strip[j].value();
       }
