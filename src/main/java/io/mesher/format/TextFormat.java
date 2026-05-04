@@ -42,8 +42,8 @@ public final class TextFormat {
 
   public final Voxels load(Path path) {
     Objects.requireNonNull(path, "path");
-    try {
-      return load(Files.lines(path));
+    try (var lines = Files.lines(path)) {
+      return load(lines);
     } catch (IOException e) {
       throw new UncheckedIOException("failed to load %s!".formatted(path), e);
     }
