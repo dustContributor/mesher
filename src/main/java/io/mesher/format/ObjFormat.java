@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -32,7 +34,7 @@ public final class ObjFormat {
      * Fill the tracker with all the vertices, normals and texture coordinates. The
      * tracker will coalesce equal vertices, assigning them an index each
      */
-    var tracker = new VertTracker();
+    var tracker = new Tracker();
     for (var quad : quads) {
       var position = to3i(quad.position());
       var side = quad.side();
@@ -75,16 +77,38 @@ public final class ObjFormat {
            * The normal is perpendicular to the plane, in the direction of the remaining
            * axis
            */
-          tracker.normal(AxisSide.of(remainingAxis, side).direction())));
+          tracker.normal(AxisSide.of(remainingAxis, side).direction()),
+          // mesh properties
+          quad.value()));
     }
+    // Important to sort before writing the file!
+    indexedQuads.sort(IndexedQuad.CMP);
     // Build OBJ content
     try (var formatter = new Formatter(path.toFile(), StandardCharsets.UTF_8, Locale.ROOT)) {
+      formatter.format("# header:file generated with voxel->mesh tool%n");
+      formatter.format("# tstamp:%s%n", Instant.now().truncatedTo(ChronoUnit.MILLIS));
+      formatter.format(
+          "# json:{\"type\":\"%s\",\"vertices\":%d,\"normals\":%d,\"texCoords\":%d,\"triangles\":%d}%n",
+          "meshStats",
+          tracker.verticesCount(),
+          tracker.normalsCount(),
+          tracker.coordsCount(),
+          indexedQuads.size() * 2 // two triangles per quad
+      );
       // Write each de-duplicated attribute first in the file
+      formatter.format("# region:vertices%n");
       tracker.vertices().forEach(v -> formatter.format("v %d.0 %d.0 %d.0%n", v.x(), v.y(), v.z()));
+      formatter.format("# region:texcoords%n");
       tracker.coords().forEach(c -> formatter.format("vt %d.0 %d.0%n", c.x(), c.y()));
+      formatter.format("# region:normals%n");
       tracker.normals().forEach(n -> formatter.format("vn %d.0 %d.0 %d.0%n", n.x(), n.y(), n.z()));
       // Split each quad into 2 triangles: 0->1->2 and 0->2->3
+      var lastValue = 0;
+      formatter.format("# region:faces%n");
       for (var quad : indexedQuads) {
+        if (lastValue != quad.value()) {
+          formatter.format("g json:{\"type\":\"%s\",\"value\":%d}%n", "voxelMeta", lastValue = quad.value());
+        }
         // Triangle 1: 0, 1, 2
         formatter.format("f %d/%d/%d %d/%d/%d %d/%d/%d%n",
             quad.vert0(), quad.coord0(), quad.normal(),
@@ -113,13 +137,35 @@ public final class ObjFormat {
     return new Vector3i(v);
   }
 
-  private static final class VertTracker {
+  private record IndexedQuad(
+      int vert0,
+      int vert1,
+      int vert2,
+      int vert3,
+      int coord0,
+      int coord1,
+      int coord2,
+      int coord3,
+      int normal,
+      int value) {
+    /**
+     * Sort quads to group them by voxel metadata below, plus sort them by vertices
+     * so the geometry will be more contiguous in the file since we're at it
+     */
+    public static final Comparator<IndexedQuad> CMP = Comparator
+        .comparingInt(IndexedQuad::value)
+        .thenComparingInt(IndexedQuad::vert0)
+        .thenComparingInt(IndexedQuad::vert1)
+        .thenComparingInt(IndexedQuad::vert2)
+        .thenComparingInt(IndexedQuad::vert3);
+  }
 
+  private static final class Tracker {
     private final Map<Vector3ic, Integer> vertices;
     private final Map<Vector2ic, Integer> coords;
     private final Map<Vector3ic, Integer> normals;
 
-    public VertTracker() {
+    public Tracker() {
       this.vertices = new HashMap<>();
       this.coords = new HashMap<>();
       this.normals = new HashMap<>();
@@ -149,6 +195,18 @@ public final class ObjFormat {
       return sortedStream(coords);
     }
 
+    public final int verticesCount() {
+      return vertices.size();
+    }
+
+    public final int normalsCount() {
+      return normals.size();
+    }
+
+    public final int coordsCount() {
+      return coords.size();
+    }
+
     private static <T> int attrib(T v, Map<T, Integer> map) {
       var idx = map.getOrDefault(v, Integer.valueOf(0)).intValue();
       if (idx <= 0) {
@@ -164,18 +222,6 @@ public final class ObjFormat {
           .map(v -> v.getKey());
     }
 
-  }
-
-  private record IndexedQuad(
-      int vert0,
-      int vert1,
-      int vert2,
-      int vert3,
-      int coord0,
-      int coord1,
-      int coord2,
-      int coord3,
-      int normal) {
   }
 
 }
